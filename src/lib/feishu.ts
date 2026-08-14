@@ -13,7 +13,7 @@ const TOKEN_KEY = 'weight-tracker-feishu-token-v1'
  * - 本地 dev：走 Vite 代理 '/feishu'
  * - 线上（GitHub Pages）：走 Cloudflare Worker（部署 worker 后回填 PROD_PROXY）
  */
-export const PROD_PROXY = ''
+export const PROD_PROXY = 'https://feishu-proxy.lalaworld.workers.dev'
 const API_BASE = import.meta.env.DEV ? '/feishu' : PROD_PROXY
 
 /**
