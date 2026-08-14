@@ -14,9 +14,9 @@ const PAD_BOTTOM = 26
 export default function WeightChart({ entries }: Props) {
   const [active, setActive] = useState<number | null>(null)
 
-  const { points, minW, maxW, labels } = useMemo(() => {
+  const { points, labels } = useMemo(() => {
     if (entries.length === 0) {
-      return { points: [] as { x: number; y: number }[], minW: 0, maxW: 0, labels: [] as string[] }
+      return { points: [] as { x: number; y: number }[], labels: [] as string[] }
     }
     const weights = entries.map((e) => e.weight)
     let min = Math.min(...weights)
@@ -39,7 +39,7 @@ export default function WeightChart({ entries }: Props) {
       const [, m, d] = iso.split('-')
       return `${Number(m)}/${Number(d)}`
     }
-    return { points: pts, minW: min, maxW: max, labels: entries.map((e) => fmt(e.date)) }
+    return { points: pts, labels: entries.map((e) => fmt(e.date)) }
   }, [entries])
 
   if (entries.length === 0) {
@@ -149,13 +149,31 @@ export default function WeightChart({ entries }: Props) {
           )
         })}
 
-        {/* min / max hints（放在绘图区内侧，避开 X 轴标签） */}
-        <text x={PAD_X} y={PAD_TOP - 6} fontSize="9" fill="rgba(255,255,255,0.45)">
-          {maxW.toFixed(1)} kg
-        </text>
-        <text x={PAD_X} y={H - PAD_BOTTOM - 4} fontSize="9" fill="rgba(255,255,255,0.45)">
-          {minW.toFixed(1)} kg
-        </text>
+        {/* 数据点数值标注：点少时全标；点多时只标最高/最低/最新 */}
+        {(() => {
+          const n = entries.length
+          const weights = entries.map((e) => e.weight)
+          const minIdx = weights.indexOf(Math.min(...weights))
+          const maxIdx = weights.indexOf(Math.max(...weights))
+          return points.map((p, i) => {
+            const show = n <= 10 || i === minIdx || i === maxIdx || i === n - 1
+            if (!show || activeIdx === i) return null
+            const anchor = i === 0 && n > 1 ? 'start' : i === n - 1 && n > 1 ? 'end' : 'middle'
+            return (
+              <text
+                key={i}
+                x={p.x}
+                y={p.y - 10}
+                textAnchor={anchor}
+                fontSize="9"
+                fontWeight="600"
+                fill="rgba(255,255,255,0.8)"
+              >
+                {entries[i].weight.toFixed(1)}
+              </text>
+            )
+          })
+        })()}
       </svg>
 
       {activeIdx !== null && (
