@@ -16,6 +16,9 @@ const TOKEN_KEY = 'weight-tracker-feishu-token-v1'
 export const PROD_PROXY = 'https://feishu-proxy.lalaworld.workers.dev'
 const API_BASE = import.meta.env.DEV ? '/feishu' : PROD_PROXY
 
+/** 请求超时：网络不可达时快速失败，避免界面卡在加载态 */
+const FETCH_TIMEOUT_MS = 12000
+
 /**
  * 多维表格位置（已由 API 建好，用户无需手动填写）。
  * 表格「体重记录 / 每日记录」，字段：日期(文本) / 体重(数字) / 备注(文本)
@@ -100,6 +103,7 @@ async function getTenantToken(c: FeishuConfig): Promise<string> {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ app_id: c.appId, app_secret: c.appSecret }),
+    signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
   })
   const data = await res.json()
   if (data.code !== 0) {
@@ -117,6 +121,7 @@ async function api(c: FeishuConfig, path: string, init?: RequestInit) {
   const token = await getTenantToken(c)
   const res = await fetch(`${API_BASE}/open-apis${path}`, {
     ...init,
+    signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
     headers: {
       'Content-Type': 'application/json',
       Authorization: `Bearer ${token}`,

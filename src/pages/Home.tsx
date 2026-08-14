@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { Plus, TrendingDown, TrendingUp, Minus, Trash2, Pencil, Scale, Target, Cloud, RefreshCw } from 'lucide-react'
+import { Plus, TrendingDown, TrendingUp, Minus, Trash2, Pencil, Scale, Target, RefreshCw } from 'lucide-react'
 import { useWeightEntries, todayISO } from '@/hooks/useWeightEntries'
 import { useGoalWeight } from '@/hooks/useGoalWeight'
 import {
@@ -15,11 +15,21 @@ import type { WeightEntry } from '@/types/weight'
 import WeightChart from '@/components/WeightChart'
 import AddEntrySheet from '@/components/AddEntrySheet'
 import GoalSheet from '@/components/GoalSheet'
-import FeishuSheet from '@/components/FeishuSheet'
 
 type Range = 'week' | 'month' | 'all'
 
 const RANGE_LABEL: Record<Range, string> = { week: '近 7 天', month: '近 30 天', all: '全部' }
+
+/** 把同步错误翻译成用户能看懂的提示 */
+function friendlyError(e: unknown): string {
+  if (
+    e instanceof Error &&
+    (e.name === 'TimeoutError' || e.name === 'AbortError' || e.message.includes('timed out'))
+  ) {
+    return '网络超时，当前网络可能无法访问同步代理'
+  }
+  return e instanceof Error ? e.message : '未知错误'
+}
 
 function formatDate(iso: string): string {
   const [y, m, d] = iso.split('-').map(Number)
@@ -44,8 +54,7 @@ export default function Home() {
   const [goalOpen, setGoalOpen] = useState(false)
   const [editing, setEditing] = useState<WeightEntry | null>(null)
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null)
-  const [feishuOpen, setFeishuOpen] = useState(false)
-  const [feishuConfig, setFeishuConfig] = useState<FeishuConfig>(loadFeishuConfig)
+  const [feishuConfig] = useState<FeishuConfig>(loadFeishuConfig)
   const [syncStatus, setSyncStatus] = useState('')
   const [loadingRemote, setLoadingRemote] = useState(false)
 
@@ -69,7 +78,7 @@ export default function Home() {
         setSyncStatus(`已从飞书加载 ${list.length} 条记录`)
       })
       .catch((e) =>
-        setSyncStatus(`读取飞书失败：${e instanceof Error ? e.message : '未知错误'}`),
+        setSyncStatus(`读取飞书失败：${friendlyError(e)}`),
       )
       .finally(() => setLoadingRemote(false))
   }, [feishuConfig, replaceAll])
@@ -100,7 +109,7 @@ export default function Home() {
       setSyncStatus('正在同步飞书…')
       syncUpsert(feishuConfig, date, weight, note)
         .then(() => setSyncStatus('已同步到飞书 ✓'))
-        .catch((e) => setSyncStatus(`飞书同步失败：${e instanceof Error ? e.message : '未知错误'}`))
+        .catch((e) => setSyncStatus(`飞书同步失败：${friendlyError(e)}`))
     }
   }
 
@@ -111,7 +120,7 @@ export default function Home() {
       setSyncStatus('正在同步飞书…')
       syncRemove(feishuConfig, entry.date)
         .then(() => setSyncStatus('已同步到飞书 ✓'))
-        .catch((e) => setSyncStatus(`飞书同步失败：${e instanceof Error ? e.message : '未知错误'}`))
+        .catch((e) => setSyncStatus(`飞书同步失败：${friendlyError(e)}`))
     }
   }
 
@@ -164,15 +173,6 @@ export default function Home() {
             <h1 className="text-2xl font-extrabold text-white drop-shadow-sm">每日重量记录</h1>
           </div>
           <div className="flex items-center gap-2">
-            <button
-              aria-label="飞书同步设置"
-              onClick={() => setFeishuOpen(true)}
-              className={`glass-card flex h-11 w-11 items-center justify-center rounded-2xl transition active:scale-95 ${
-                feishuConfigured(feishuConfig) ? 'text-cyan-200' : 'text-white/90'
-              }`}
-            >
-              <Cloud size={20} />
-            </button>
             <button
               aria-label="设置目标体重"
               onClick={() => setGoalOpen(true)}
@@ -363,21 +363,21 @@ export default function Home() {
         </section>
       </div>
 
-      {/* Floating add button */}
+      {/* Floating add button（右下角） */}
       <button
         onClick={() => {
           setEditing(null)
           setSheetOpen(true)
         }}
-        className="mb-safe fixed bottom-8 left-1/2 z-40 flex h-16 w-16 -translate-x-1/2 items-center justify-center rounded-full bg-white text-violet-700 shadow-xl shadow-violet-900/40 transition active:scale-95"
+        className="mb-safe fixed bottom-6 right-5 z-40 flex h-14 w-14 items-center justify-center rounded-full bg-white text-violet-700 shadow-xl shadow-violet-900/40 transition active:scale-95"
         aria-label="记录重量"
       >
-        <Plus size={28} strokeWidth={2.5} />
+        <Plus size={26} strokeWidth={2.5} />
       </button>
 
       {/* 飞书同步状态提示 */}
       {syncStatus && (
-        <div className="mb-safe fixed bottom-28 left-1/2 z-40 -translate-x-1/2 whitespace-nowrap rounded-full bg-white/90 px-4 py-2 text-xs font-semibold text-slate-800 shadow-lg backdrop-blur">
+        <div className="mb-safe fixed bottom-24 left-1/2 z-40 -translate-x-1/2 whitespace-nowrap rounded-full bg-white/90 px-4 py-2 text-xs font-semibold text-slate-800 shadow-lg backdrop-blur">
           {syncStatus}
         </div>
       )}
@@ -394,13 +394,6 @@ export default function Home() {
         goal={goal}
         onClose={() => setGoalOpen(false)}
         onSave={setGoal}
-      />
-
-      <FeishuSheet
-        open={feishuOpen}
-        onClose={() => setFeishuOpen(false)}
-        onConfigChange={setFeishuConfig}
-        syncStatus={syncStatus}
       />
     </div>
   )
