@@ -1,0 +1,191 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 240 10% 3.9%;
+    --card: 0 0% 100%;
+    --card-foreground: 240 10% 3.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 240 10% 3.9%;
+    --primary: 240 5.9% 10%;
+    --primary-foreground: 0 0% 98%;
+    --secondary: 240 4.8% 95.9%;
+    --secondary-foreground: 240 5.9% 10%;
+    --muted: 240 4.8% 95.9%;
+    --muted-foreground: 240 3.8% 46.1%;
+    --accent: 240 4.8% 95.9%;
+    --accent-foreground: 240 5.9% 10%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 240 5.9% 90%;
+    --input: 240 5.9% 90%;
+    --ring: 240 5.9% 10%;
+    --radius: 0.625rem;
+    --sidebar-background: 0 0% 98%;
+    --sidebar-foreground: 240 5.3% 26.1%;
+    --sidebar-primary: 240 5.9% 10%;
+    --sidebar-primary-foreground: 0 0% 98%;
+    --sidebar-accent: 240 4.8% 95.9%;
+    --sidebar-accent-foreground: 240 5.9% 10%;
+    --sidebar-border: 220 13% 91%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+
+  .dark {
+    --background: 240 10% 3.9%;
+    --foreground: 0 0% 98%;
+    --card: 240 10% 3.9%;
+    --card-foreground: 0 0% 98%;
+    --popover: 240 10% 3.9%;
+    --popover-foreground: 0 0% 98%;
+    --primary: 0 0% 98%;
+    --primary-foreground: 240 5.9% 10%;
+    --secondary: 240 3.7% 15.9%;
+    --secondary-foreground: 0 0% 98%;
+    --muted: 240 3.7% 15.9%;
+    --muted-foreground: 240 5% 64.9%;
+    --accent: 240 3.7% 15.9%;
+    --accent-foreground: 0 0% 98%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 240 3.7% 15.9%;
+    --input: 240 3.7% 15.9%;
+    --ring: 240 4.9% 83.9%;
+    --sidebar-background: 240 5.9% 10%;
+    --sidebar-foreground: 240 4.8% 95.9%;
+    --sidebar-primary: 224.3 76.3% 48%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 240 3.7% 15.9%;
+    --sidebar-accent-foreground: 240 4.8% 95.9%;
+    --sidebar-border: 240 3.7% 15.9%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  html {
+    background: #0c0718;
+    /* 防止 iOS 橡皮筋滚动时露出白边 */
+    overscroll-behavior-y: none;
+  }
+  body {
+    @apply bg-background text-foreground;
+    background: #0c0718;
+    font-family:
+      -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'PingFang SC',
+      'Helvetica Neue', 'Segoe UI', Roboto, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+  }
+  input,
+  textarea {
+    user-select: text;
+  }
+}
+
+@layer components {
+  /* iOS 26 极光渐变背景 */
+  .aurora-bg {
+    position: relative;
+    background:
+      radial-gradient(120% 60% at 15% -5%, rgba(124, 58, 237, 0.55) 0%, transparent 60%),
+      radial-gradient(100% 55% at 95% 10%, rgba(217, 70, 239, 0.4) 0%, transparent 55%),
+      radial-gradient(90% 50% at 50% 110%, rgba(56, 189, 248, 0.3) 0%, transparent 60%),
+      linear-gradient(180deg, #17092b 0%, #0c0718 55%, #0a0614 100%);
+    background-attachment: fixed;
+  }
+
+  /* Liquid Glass 卡片 */
+  .glass-card {
+    background: linear-gradient(150deg, rgba(255, 255, 255, 0.16), rgba(255, 255, 255, 0.06));
+    border: 1px solid rgba(255, 255, 255, 0.22);
+    box-shadow:
+      0 12px 40px rgba(6, 2, 20, 0.45),
+      inset 0 1px 0 rgba(255, 255, 255, 0.25);
+    backdrop-filter: blur(28px) saturate(160%);
+    -webkit-backdrop-filter: blur(28px) saturate(160%);
+  }
+
+  /* 玻璃质感输入框 */
+  .glass-input {
+    @apply w-full rounded-2xl px-4 py-3 text-base text-white outline-none transition;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+  }
+  .glass-input::placeholder {
+    color: rgba(255, 255, 255, 0.35);
+  }
+  .glass-input:focus {
+    border-color: rgba(255, 255, 255, 0.45);
+    background: rgba(255, 255, 255, 0.16);
+    box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.08);
+  }
+  /* iOS 上 date input 的配色 */
+  .glass-input::-webkit-calendar-picker-indicator {
+    filter: invert(1);
+    opacity: 0.6;
+  }
+
+  /* 底部弹层上滑动画 */
+  .animate-sheet-up {
+    animation: sheet-up 0.32s cubic-bezier(0.32, 0.72, 0, 1) both;
+  }
+  @keyframes sheet-up {
+    from {
+      transform: translateY(100%);
+      opacity: 0.4;
+    }
+    to {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
+
+  /* 数字滚动进场 */
+  .animate-pop-in {
+    animation: pop-in 0.45s cubic-bezier(0.32, 0.72, 0, 1) both;
+  }
+  @keyframes pop-in {
+    from {
+      transform: scale(0.92);
+      opacity: 0;
+    }
+    to {
+      transform: scale(1);
+      opacity: 1;
+    }
+  }
+
+  /* 隐藏 number input 的步进箭头 */
+  input[type='number']::-webkit-outer-spin-button,
+  input[type='number']::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+  input[type='number'] {
+    -moz-appearance: textfield;
+    appearance: textfield;
+  }
+}
+
+/* iOS 安全区工具类 */
+@layer utilities {
+  .pt-safe {
+    padding-top: env(safe-area-inset-top);
+  }
+  .pb-safe {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  .mb-safe {
+    margin-bottom: env(safe-area-inset-bottom);
+  }
+}
